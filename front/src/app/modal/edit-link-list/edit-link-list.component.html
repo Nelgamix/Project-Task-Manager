@@ -1,0 +1,37 @@
+<div class="modal-header">
+  <h4 class="modal-title">Edit links</h4>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <button class="btn btn-primary mb-2" (click)="addLink()">Add link</button>
+  <form>
+    <div *ngFor="let l of links; let i = index">
+      <hr>
+
+      <div class="form-group row">
+        <label [for]="'name' + i" class="col-form-label col-4">Name</label>
+        <div class="col-8">
+          <input class="form-control" type="text" [id]="'name' + i" [name]="'name' + i" [(ngModel)]="l.name">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label [for]="'description' + i" class="col-form-label col-4">Description</label>
+        <div class="col-8">
+          <input class="form-control" type="text" [id]="'description' + i" [name]="'description' + i" [(ngModel)]="l.description">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label [for]="'url' + i" class="col-form-label col-4">Url</label>
+        <div class="col-8">
+          <input class="form-control" type="url" [id]="'url' + i" [name]="'url' + i" [(ngModel)]="l.url">
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-success" (click)="save()">Save</button>
+  <button type="button" class="btn btn-outline-dark" (click)="modal.close()">Close</button>
+</div>

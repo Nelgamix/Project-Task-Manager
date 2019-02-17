@@ -1,0 +1,26 @@
+<div class="modal-header">
+  <h4 class="modal-title">Edit project {{name}}</h4>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <button class="btn btn-primary mb-2" (click)="addProperty()">Add property</button>
+  <form>
+    <div class="row mt-2" *ngFor="let p of properties; let i = index">
+      <div class="col-4">
+        <input type="text" class="form-control" placeholder="Property id" [(ngModel)]="p.id" [name]="'id' + i">
+      </div>
+      <div class="col">
+        <input type="text" class="form-control" placeholder="Property name" [(ngModel)]="p.name" [name]="'name' + i">
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-danger" (click)="removeProperty(i)"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-success" (click)="save()">Save</button>
+  <button type="button" class="btn btn-outline-dark" (click)="modal.close()">Close</button>
+</div>

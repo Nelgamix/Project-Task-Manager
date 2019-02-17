@@ -1,0 +1,121 @@
+<div class="container pt-2 mb-2">
+  <div *ngIf="project">
+    <div class="row">
+      <div class="col">
+        <h2>{{project.name}}</h2>
+        <h4>{{project.description}}</h4>
+        <h6>Created {{project.created | date:'medium'}}</h6>
+        <h6>Last updated {{project.lastUpdated | date:'medium'}}</h6>
+        <h6><a *ngFor="let l of project.links" [href]="l.url" target="_blank"><i class="fas fa-link"></i> {{l.name}}</a></h6>
+      </div>
+      <div class="col-auto">
+        <ul id="list-view-properties">
+          <li><a href="javascript:void(0)" (click)="editProperty('states')">States ({{project.states.length}})</a></li>
+          <li><a href="javascript:void(0)" (click)="editProperty('priorities')">Priorities ({{project.priorities.length}})</a></li>
+          <li><a href="javascript:void(0)" (click)="editProperty('types')">Types ({{project.types.length}})</a></li>
+          <li><a href="javascript:void(0)" (click)="editProperty('estimatedTimes')">Estimated Times ({{project.estimatedTimes.length}})</a></li>
+          <li><a href="javascript:void(0)" (click)="editProperty('difficulties')">Difficulties ({{project.difficulties.length}})</a></li>
+          <li><a href="javascript:void(0)" (click)="editProperty('categories')">Categories ({{project.categories.length}})</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="d-flex flex-row-reverse mt-2">
+      <div class="btn-group">
+        <button class="btn btn-danger" (click)="deleteProject()">Delete project</button>
+        <button class="btn btn-warning" (click)="editProjectDetails()">Edit project details</button>
+        <button class="btn btn-warning" (click)="editLinks()">Edit links</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <div>
+      <div class="d-flex flex-row-reverse mb-3">
+        <button class="btn btn-primary" (click)="createTask()">New Task</button>
+      </div>
+
+      <div class="input-group mb-2">
+        <div class="input-group-prepend">
+          <span class="input-group-text"><i class="fas fa-filter"></i></span>
+        </div>
+        <input
+          class="form-control"
+          type="text"
+          placeholder="Filter"
+          id="filter"
+          name="filter"
+          [(ngModel)]="filter.name"
+          (keyup)="filterByName($event.target.value)"
+          (click)="$event.which === 2 ? filterByName('') : null">
+      </div>
+
+      <div class="row mb-2">
+        <div class="col">
+          <ng-select [items]="project.states" bindLabel="name" (change)="filterByState($event)" placeholder="State"></ng-select>
+        </div>
+        <div class="col">
+          <ng-select [items]="project.priorities" bindLabel="name" (change)="filterByPriority($event)" placeholder="Priority"></ng-select>
+        </div>
+        <div class="col">
+          <ng-select [items]="project.types" bindLabel="name" (change)="filterByType($event)" placeholder="Type"></ng-select>
+        </div>
+        <div class="col">
+          <ng-select [items]="project.estimatedTimes" bindLabel="name" (change)="filterByEstimatedTime($event)" placeholder="Estimated Time"></ng-select>
+        </div>
+        <div class="col">
+          <ng-select [items]="project.difficulties" bindLabel="name" (change)="filterByDifficulty($event)" placeholder="Difficulty"></ng-select>
+        </div>
+        <div class="col">
+          <ng-select [items]="project.categories" bindLabel="name" (change)="filterByCategory($event)" placeholder="Category"></ng-select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!project">
+    Project Does not exists
+  </div>
+</div>
+
+<div class="container-fluid mb-2" *ngIf="project">
+  <ngx-datatable
+    [rowHeight]="'auto'"
+    [columnMode]="'flex'"
+    [headerHeight]="50"
+    class="material"
+    [rows]="tasksRowsFiltered"
+    [columns]="tasksColumns"
+    (activate)="activate($event)">
+  </ngx-datatable>
+</div>
+
+<ng-template #tableDate let-value="value">
+  {{value | date:'medium'}}
+</ng-template>
+
+<ng-template #tableState let-value="value">
+  {{getStateName(value)}}
+</ng-template>
+
+<ng-template #tableDifficulty let-value="value">
+  {{getStateDifficulty(value)}}
+</ng-template>
+
+<ng-template #tableEstimatedTime let-value="value">
+  {{getStateEstimatedTime(value)}}
+</ng-template>
+
+<ng-template #tableType let-value="value">
+  {{getStateType(value)}}
+</ng-template>
+
+<ng-template #tableCategory let-value="value">
+  {{getStateCategory(value)}}
+</ng-template>
+
+<ng-template #tablePriority let-value="value">
+  {{getStatePriority(value)}}
+</ng-template>
+
+<ngx-loading [show]="loading"></ngx-loading>

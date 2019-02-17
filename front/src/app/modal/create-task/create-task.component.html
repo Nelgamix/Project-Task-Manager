@@ -1,0 +1,42 @@
+<div class="modal-header">
+  <h4 class="modal-title">Create Task</h4>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <form>
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input #name class="form-control" type="text" id="name" name="name" [(ngModel)]="form.name" (keyup.enter)="create()">
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea class="form-control" name="description" id="description" rows="5" [(ngModel)]="form.description"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="priority">Priority</label>
+      <ng-select class="w-100" [items]="project.priorities" bindLabel="name" bindValue="id" id="priority" name="priority" [(ngModel)]="form.priority"></ng-select>
+    </div>
+    <div class="form-group">
+      <label for="type">Type</label>
+      <ng-select class="w-100" [items]="project.types" bindLabel="name" bindValue="id" id="type" name="type" [(ngModel)]="form.type"></ng-select>
+    </div>
+    <div class="form-group">
+      <label for="estimatedTime">Estimated Time</label>
+      <ng-select class="w-100" [items]="project.estimatedTimes" bindLabel="name" bindValue="id" id="estimatedTime" name="estimatedTime" [(ngModel)]="form.estimatedTime"></ng-select>
+    </div>
+    <div class="form-group">
+      <label for="difficulty">Difficulty</label>
+      <ng-select class="w-100" [items]="project.difficulties" bindLabel="name" bindValue="id" id="difficulty" name="difficulty" [(ngModel)]="form.difficulty"></ng-select>
+    </div>
+    <div class="form-group">
+      <label for="category">Category</label>
+      <ng-select class="w-100" [items]="project.categories" bindLabel="name" bindValue="id" id="category" name="category" [(ngModel)]="form.category"></ng-select>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-success" (click)="create()">Create</button>
+  <button type="button" class="btn btn-outline-dark" (click)="modal.close()">Close</button>
+</div>

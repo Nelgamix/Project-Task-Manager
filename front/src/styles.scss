@@ -1,0 +1,16 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~bootstrap/scss/bootstrap";
+
+@import '~ngx-toastr/toastr-bs4-alert';
+
+@import "~@ng-select/ng-select/themes/default.theme.css";
+
+@import '~@swimlane/ngx-datatable/release/index.css';
+@import '~@swimlane/ngx-datatable/release/themes/material.css';
+@import '~@swimlane/ngx-datatable/release/assets/icons.css';
+
+@import "~@fortawesome/fontawesome-free/css/all.css";
+
+#toast-container > div {
+  opacity: 1;
+}

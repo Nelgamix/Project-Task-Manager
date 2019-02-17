@@ -1,0 +1,86 @@
+<div class="container pt-2 mb-2">
+  <div *ngIf="task">
+    <div class="row">
+      <div class="col">
+        <h3><span class="text-muted" id="go-back" (click)="goToProject()">{{task.project.name}}/</span>{{task.name}}</h3>
+        <h4>{{task.description}}</h4>
+        <h6>Created by {{task.user.displayName}}</h6>
+        <h6>Created {{task.created | date:'medium'}}</h6>
+        <h6>Last updated {{task.lastUpdated | date:'medium'}}</h6>
+        <h6><a *ngFor="let l of task.links" [href]="l.url" target="_blank"><i class="fas fa-link"></i> {{l.name}}</a></h6>
+        <!-- TODO: TAGS -->
+      </div>
+      <div class="col-5">
+        <div class="row form-group">
+          <label for="state" class="col-form-label col">State</label>
+          <div class="col">
+            <ng-select [items]="task.project.states" bindLabel="name" bindValue="id" [ngModel]="task.state" name="state" id="state" (change)="changeState($event)"></ng-select>
+          </div>
+        </div>
+        <div class="row form-group">
+          <label for="priority" class="col-form-label col">Priority</label>
+          <div class="col">
+            <ng-select [items]="task.project.priorities" bindLabel="name" bindValue="id" [ngModel]="task.priority" name="priority" id="priority" (change)="changePriority($event)"></ng-select>
+          </div>
+        </div>
+        <div class="row form-group">
+          <label for="difficulty" class="col-form-label col">Difficulty</label>
+          <div class="col">
+            <ng-select [items]="task.project.difficulties" bindLabel="name" bindValue="id" [ngModel]="task.difficulty" name="difficulty" id="difficulty" (change)="changeDifficulty($event)"></ng-select>
+          </div>
+        </div>
+        <div class="row form-group">
+          <label for="estimatedTime" class="col-form-label col">Estimated Time</label>
+          <div class="col">
+            <ng-select [items]="task.project.estimatedTimes" bindLabel="name" bindValue="id" [ngModel]="task.estimatedTime" name="estimatedTime" id="estimatedTime" (change)="changeEstimatedTime($event)"></ng-select>
+          </div>
+        </div>
+        <div class="row form-group">
+          <label for="type" class="col-form-label col">Type</label>
+          <div class="col">
+            <ng-select [items]="task.project.types" bindLabel="name" bindValue="id" [ngModel]="task.type" name="type" id="type" (change)="changeType($event)"></ng-select>
+          </div>
+        </div>
+        <div class="row form-group">
+          <label for="category" class="col-form-label col">Category</label>
+          <div class="col">
+            <ng-select [items]="task.project.categories" bindLabel="name" bindValue="id" [ngModel]="task.category" name="category" id="category" (change)="changeCategory($event)"></ng-select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex flex-row-reverse mt-2">
+      <div class="btn-group">
+        <button class="btn btn-danger" (click)="deleteTask()">Delete task</button>
+        <button class="btn btn-warning" (click)="editTaskDetails()">Edit task details</button>
+        <button class="btn btn-warning" (click)="editLinks()">Edit links</button>
+        <button class="btn btn-warning" (click)="editTags()">Edit tags</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <div>
+      <h3>
+        Todo
+        <button class="btn btn-primary float-right" (click)="changeTodo()"><i class="fas fa-save"></i> Save</button>
+      </h3>
+      <td-text-editor #textEditorTodo [value]="task.todo"></td-text-editor>
+
+      <hr>
+
+      <h3>
+        Log
+        <button class="btn btn-primary float-right" (click)="changeLog()"><i class="fas fa-save"></i> Save</button>
+      </h3>
+      <td-text-editor #textEditorLog [value]="task.log"></td-text-editor>
+    </div>
+  </div>
+
+  <div *ngIf="!task">
+    Task Could not be found
+  </div>
+</div>
+
+<ngx-loading [show]="loading"></ngx-loading>

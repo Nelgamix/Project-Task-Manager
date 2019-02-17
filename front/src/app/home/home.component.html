@@ -1,0 +1,55 @@
+<div class="container pt-2 mb-2">
+  <div *ngIf="user">
+    <h2>
+      {{user.displayName}}
+      <small class="text-muted">(@{{user.name}})</small>
+      <span class="text-capitalize" [ngSwitch]="user.role" id="badge-role">
+        <span class="badge badge-danger" *ngSwitchCase="'admin'">{{user.role}}</span>
+        <span class="badge badge-primary" *ngSwitchCase="'user'">{{user.role}}</span>
+      </span>
+    </h2>
+    <h4>{{user.email}}</h4>
+    <h6>Created {{user.created | date:'medium'}}</h6>
+
+    <hr>
+
+    <div>
+      <div class="d-flex flex-row-reverse mb-3">
+        <button class="btn btn-primary" (click)="createProject()">New Project</button>
+      </div>
+
+      <div class="input-group mb-2">
+        <div class="input-group-prepend">
+          <span class="input-group-text"><i class="fas fa-filter"></i></span>
+        </div>
+        <input
+          class="form-control"
+          type="text"
+          placeholder="Filter"
+          id="filter"
+          name="filter"
+          [(ngModel)]="filter"
+          (keyup)="updateFilter($event.target.value)"
+          (click)="$event.which === 2 ? updateFilter('') : null">
+      </div>
+
+      <ngx-datatable
+        [rowHeight]="'auto'"
+        [columnMode]="'flex'"
+        [headerHeight]="50"
+        class="material"
+        [rows]="projectsRowsFiltered"
+        [columns]="projectsColumns"
+        (activate)="activate($event)">
+      </ngx-datatable>
+    </div>
+  </div>
+
+  <div *ngIf="!user">
+    <h1>No User found</h1>
+  </div>
+</div>
+
+<ng-template #tableLastUpdated let-value="value">
+  {{value | date:'medium'}}
+</ng-template>
