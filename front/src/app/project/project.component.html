@@ -2,8 +2,9 @@
   <div *ngIf="project">
     <div class="row">
       <div class="col">
+        <h5 class="mb-0"><span class="text-muted" id="go-back" (click)="goToHome()">{{project.user.displayName}}</span></h5>
         <h2>{{project.name}}</h2>
-        <h4>{{project.description}}</h4>
+        <blockquote class="blockquote">{{project.description}}</blockquote>
         <h6>Created {{project.created | date:'medium'}}</h6>
         <h6>Last updated {{project.lastUpdated | date:'medium'}}</h6>
         <h6><a *ngFor="let l of project.links" [href]="l.url" target="_blank"><i class="fas fa-link"></i> {{l.name}}</a></h6>
@@ -71,23 +72,21 @@
         </div>
       </div>
     </div>
+
+    <ngx-datatable
+      [rowHeight]="'auto'"
+      [columnMode]="'flex'"
+      [headerHeight]="50"
+      class="material"
+      [rows]="tasksRowsFiltered"
+      [columns]="tasksColumns"
+      (activate)="activate($event)">
+    </ngx-datatable>
   </div>
 
   <div *ngIf="!project">
     Project Does not exists
   </div>
-</div>
-
-<div class="container-fluid mb-2" *ngIf="project">
-  <ngx-datatable
-    [rowHeight]="'auto'"
-    [columnMode]="'flex'"
-    [headerHeight]="50"
-    class="material"
-    [rows]="tasksRowsFiltered"
-    [columns]="tasksColumns"
-    (activate)="activate($event)">
-  </ngx-datatable>
 </div>
 
 <ng-template #tableDate let-value="value">

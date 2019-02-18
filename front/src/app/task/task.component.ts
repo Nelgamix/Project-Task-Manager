@@ -12,6 +12,7 @@ import {
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {TdTextEditorComponent} from '@covalent/text-editor';
 import {EditLinkListComponent} from '../modal/edit-link-list/edit-link-list.component';
+import {EditTaskDetailsComponent} from '../modal/edit-task-details/edit-task-details.component';
 
 @Component({
   selector: 'app-task',
@@ -106,7 +107,7 @@ export class TaskComponent implements OnInit {
     if (confirm('Are you sure you want to delete this task?')) {
       const projectId = this.task.projectId;
       this.setLoading(true);
-      this.api.deleteProject(this.task._id).subscribe(() => {
+      this.api.deleteTask(this.task._id).subscribe(() => {
         this.setLoading(false);
         this.router.navigate(['/project', projectId]);
       });
@@ -119,9 +120,9 @@ export class TaskComponent implements OnInit {
     ref.result.then(res => {
       if (res) {
         this.setLoading(true);
-        this.api.updateProject(this.task._id, {links: res}).subscribe(project => {
+        this.api.updateTask(this.task._id, {links: res}).subscribe(task => {
           this.setLoading(false);
-          if (project) {
+          if (task) {
             this.task.links = res;
           }
         });
@@ -130,6 +131,21 @@ export class TaskComponent implements OnInit {
   }
 
   editTaskDetails(): void {
+    const ref = this.modalService.open(EditTaskDetailsComponent);
+    ref.componentInstance.task = this.task;
+    ref.result.then(res => {
+      if (res) {
+        this.setLoading(true);
+        this.api.updateTask(this.task._id, res).subscribe(task => {
+          this.setLoading(false);
+          if (task) {
+            for (const k of Object.keys(res)) {
+              this.task[k] = res[k];
+            }
+          }
+        });
+      }
+    }, () => 0);
   }
 
   goToProject(): void {

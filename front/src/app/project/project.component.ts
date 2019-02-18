@@ -48,7 +48,7 @@ export class ProjectComponent implements OnInit {
   tasksRows = [];
   tasksRowsFiltered = [];
   tasksColumns: any[] = [
-    {name: 'Name', flexGrow: 2},
+    {name: 'Name', flexGrow: 1},
   ];
 
   constructor(private router: Router,
@@ -208,6 +208,10 @@ export class ProjectComponent implements OnInit {
         this.router.navigate(['/home']);
       });
     }
+  }
+
+  goToHome(): void {
+    this.router.navigate(['/home']);
   }
 
   constructTable(): void {

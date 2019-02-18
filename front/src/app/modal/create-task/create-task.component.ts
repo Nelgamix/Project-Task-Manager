@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ApiService, IProject, ITaskCreate} from '../../api.service';
 
@@ -7,7 +7,7 @@ import {ApiService, IProject, ITaskCreate} from '../../api.service';
   templateUrl: './create-task.component.html',
   styleUrls: ['./create-task.component.scss']
 })
-export class CreateTaskComponent implements OnInit, AfterViewInit {
+export class CreateTaskComponent implements AfterViewInit {
   @ViewChild('name') nameInput: ElementRef;
   @Input() project: IProject;
   @Input() userId: string;
@@ -30,17 +30,14 @@ export class CreateTaskComponent implements OnInit, AfterViewInit {
 
   constructor(public modal: NgbActiveModal, private api: ApiService) { }
 
-  ngOnInit() {
-    this.form.userId = this.userId;
-    this.form.projectId = this.project._id;
-    this.form.state = this.project.states[0].id;
-  }
-
   ngAfterViewInit(): void {
     setTimeout(() => this.nameInput.nativeElement.focus(), 0);
   }
 
   create(): void {
+    this.form.state = this.project.states[0].id;
+    this.form.userId = this.userId;
+    this.form.projectId = this.project._id;
     this.loading = true;
     this.api.createTask(this.form).subscribe(task => {
       this.loading = false;
@@ -49,7 +46,7 @@ export class CreateTaskComponent implements OnInit, AfterViewInit {
       } else {
         this.error = 'Could not create task. Please try again.';
       }
-    }, err => {
+    }, () => {
       this.loading = false;
       this.error = 'Could not create task. Please try again.';
     });

@@ -11,8 +11,8 @@ const routes: Routes = [
   {path: 'home',        canActivate: [UserGuard], component: HomeComponent},
   {path: 'project/:id', canActivate: [UserGuard], component: ProjectComponent},
   {path: 'task/:id',    canActivate: [UserGuard], component: TaskComponent},
-  {path: '',            redirectTo: '/login', pathMatch: 'full'},
-  {path: '**',          redirectTo: '/login'},
+  {path: '',            redirectTo: '/home', pathMatch: 'full'},
+  {path: '**',          redirectTo: '/home'},
 ];
 
 @NgModule({

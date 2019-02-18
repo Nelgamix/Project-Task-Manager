@@ -3,47 +3,61 @@
     Error: {{error}}
   </div>
 
-  <div>
-    <h2>Login</h2>
-    <form>
-      <div class="form-group">
-        <label for="loginName">Enter your name</label>
-        <input type="text" class="form-control" id="loginName" name="loginName" [(ngModel)]="loginName">
-      </div>
-      <div class="form-group">
-        <label for="loginPassword">Enter your password</label>
-        <input type="password" class="form-control" id="loginPassword" name="loginPassword" [(ngModel)]="loginPassword">
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" (click)="login()">Login</button>
-    </form>
+  <div class="row">
+    <div class="col">
+      <h1 class="text-center display-2">Project Task Manager</h1>
+    </div>
   </div>
 
   <hr>
 
-  <div>
-    <h2>Register</h2>
-    <form>
-      <div class="form-group">
-        <label for="registerName">Enter a name</label>
-        <input type="text" class="form-control" id="registerName" name="registerName" [(ngModel)]="registerForm.name">
-      </div>
-      <div class="form-group">
-        <label for="registerDisplayName">Enter a display name</label>
-        <input type="text" class="form-control" id="registerDisplayName" name="registerDisplayName" [(ngModel)]="registerForm.displayName">
-      </div>
-      <div class="form-group">
-        <label for="registerEmail">Enter an email</label>
-        <input type="email" class="form-control" id="registerEmail" name="registerEmail" [(ngModel)]="registerForm.email">
-      </div>
-      <div class="form-group">
-        <label for="registerPassword">Enter a password</label>
-        <input type="password" class="form-control" id="registerPassword" name="registerPassword" [(ngModel)]="registerForm.password">
-      </div>
-      <div class="form-group">
-        <label for="registerConfirmPassword">Confirm your password</label>
-        <input type="password" class="form-control" id="registerConfirmPassword" name="registerConfirmPassword" [(ngModel)]="confirmPassword">
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" (click)="register()">Register</button>
-    </form>
+  <div class="row">
+    <div class="col-md-6 col-12">
+      <h2><i class="fas fa-key"></i> Login</h2>
+      <form>
+        <div class="form-group">
+          <label for="loginName">Enter your name</label>
+          <input type="text" class="form-control" id="loginName" name="loginName" [(ngModel)]="loginName">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Enter your password</label>
+          <input type="password" class="form-control" id="loginPassword" name="loginPassword" [(ngModel)]="loginPassword">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" (click)="login()">Login</button>
+      </form>
+    </div>
+
+    <div class="col-md-6 col-12">
+      <h2><i class="fas fa-pen"></i> Register</h2>
+      <form>
+        <div class="form-group">
+          <label for="registerName">Enter a name</label>
+          <input type="text" class="form-control" id="registerName" name="registerName" [(ngModel)]="registerForm.name">
+          <small class="form-text text-muted">The name is used to login.</small>
+        </div>
+        <div class="form-group">
+          <label for="registerDisplayName">Enter a display name</label>
+          <input type="text" class="form-control" id="registerDisplayName" name="registerDisplayName" [(ngModel)]="registerForm.displayName">
+          <small class="form-text text-muted">The display name is used to reference your account everywhere else.</small>
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Enter an email</label>
+          <input type="email" class="form-control" id="registerEmail" name="registerEmail" [(ngModel)]="registerForm.email">
+          <small class="form-text text-muted">The email is not used for now.</small>
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Enter a password</label>
+          <input type="password" class="form-control" id="registerPassword" name="registerPassword" [(ngModel)]="registerForm.password">
+          <small class="form-text text-muted">The password is used to login. Must be at least 4 characters long.</small>
+        </div>
+        <div class="form-group">
+          <label for="registerConfirmPassword">Confirm your password</label>
+          <input type="password" class="form-control" id="registerConfirmPassword" name="registerConfirmPassword" [(ngModel)]="confirmPassword">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" (click)="register()">Register</button>
+      </form>
+    </div>
   </div>
 </div>
+
+<ngx-loading [show]="loading"></ngx-loading>

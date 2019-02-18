@@ -23,13 +23,13 @@ export class HomeComponent implements OnInit {
   projectsRowsFiltered = [];
   projectsColumns: any[] = [
     {name: 'Name', flexGrow: 1},
-    {name: 'Description', flexGrow: 4},
+    {name: 'Description', flexGrow: 3},
   ];
 
   constructor(private api: ApiService, private auth: AuthService, private modalService: NgbModal, private router: Router) { }
 
   ngOnInit() {
-    this.projectsColumns.push({name: 'Last Updated', cellTemplate: this.tableLastUpdated, flexGrow: 2});
+    this.projectsColumns.push({name: 'Last Updated', cellTemplate: this.tableLastUpdated, flexGrow: 1});
 
     this.setLoading(true);
     this.api.getUser(this.auth.user.name).subscribe(user => {

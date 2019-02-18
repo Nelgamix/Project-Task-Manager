@@ -10,3 +10,11 @@
     cursor: pointer;
   }
 }
+
+#go-back {
+  margin-right: 6px;
+  &:hover {
+    cursor: pointer;
+    color: red!important;
+  }
+}

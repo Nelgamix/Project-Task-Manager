@@ -7,7 +7,7 @@ const router = express.Router();
 
 function login(req, res) {
     User.findByIdAndUpdate(req.user._id, {lastLogin: Date.now()}).then(() => {
-        User.findById(req.user.id, {_id: 0, __v: 0, password: 0}).then(doc => res.json(doc));
+        User.findById(req.user.id, {password: 0}).then(doc => res.json(doc));
     });
 }
 

@@ -1,3 +1,20 @@
-<p>
-  edit-task-details works!
-</p>
+<div class="modal-header">
+  <h4 class="modal-title">Edit task details</h4>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input #name class="form-control" type="text" id="name" name="name" [(ngModel)]="taskUpdate.name" (keyup.enter)="save()">
+  </div>
+  <div class="form-group">
+    <label for="description">Description</label>
+    <textarea class="form-control" id="description" name="name" rows="5" [(ngModel)]="taskUpdate.description"></textarea>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-success" (click)="save()">Save</button>
+  <button type="button" class="btn btn-outline-dark" (click)="modal.close()">Close</button>
+</div>

@@ -2,8 +2,9 @@
   <div *ngIf="task">
     <div class="row">
       <div class="col">
-        <h3><span class="text-muted" id="go-back" (click)="goToProject()">{{task.project.name}}/</span>{{task.name}}</h3>
-        <h4>{{task.description}}</h4>
+        <h5 class="mb-0"><span class="text-muted" id="go-back" (click)="goToProject()">{{task.project.name}}</span></h5>
+        <h2>{{task.name}}</h2>
+        <blockquote class="blockquote">{{task.description}}</blockquote>
         <h6>Created by {{task.user.displayName}}</h6>
         <h6>Created {{task.created | date:'medium'}}</h6>
         <h6>Last updated {{task.lastUpdated | date:'medium'}}</h6>
