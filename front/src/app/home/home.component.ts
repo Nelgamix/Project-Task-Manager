@@ -11,7 +11,7 @@ import {Router} from '@angular/router';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  @ViewChild('tableLastUpdated') tableLastUpdated: TemplateRef<any>;
+  @ViewChild('tableLastUpdated', {static: false}) tableLastUpdated: TemplateRef<any>;
 
   filter = '';
   loading = false;

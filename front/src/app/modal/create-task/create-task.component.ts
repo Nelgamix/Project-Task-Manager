@@ -8,7 +8,7 @@ import {ApiService, IProject, ITaskCreate} from '../../api.service';
   styleUrls: ['./create-task.component.scss']
 })
 export class CreateTaskComponent implements AfterViewInit {
-  @ViewChild('name') nameInput: ElementRef;
+  @ViewChild('name', {static: true}) nameInput: ElementRef;
   @Input() project: IProject;
   @Input() userId: string;
 

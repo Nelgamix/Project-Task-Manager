@@ -1,26 +1,40 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 const taskSchema = new mongoose.Schema({
-    userId:         String,
-    projectId:      String,
-    name:           String,
-    description:    String,
-    state:          String,
-    priority:       String,
-    difficulty:     String,
-    category:       String,
-    type:           String,
-    estimatedTime:  String,
-    links:          [{
+    author: { type: Schema.Types.ObjectId, ref: 'User' },
+    project: { type: Schema.Types.ObjectId, ref: 'Project' },
+    name: String,
+    description: String,
+    assignees: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    links: [{
+        id: Number,
         name: String,
         description: String,
         url: String,
     }],
-    todo:           String,
-    log:            String,
-    tags:           [String],
-    created:        { type: Date, default: Date.now },
-    lastUpdated:    { type: Date, default: Date.now },
+    texts: Schema.Types.Mixed,
+    metadata: Schema.Types.Mixed,
+    goals: [{
+        id: Number,
+        name: String,
+        done: Boolean,
+    }],
+    comments: [{
+        id: Number,
+        author: { type: Schema.Types.ObjectId, ref: 'User' },
+        date: { type: Date, default: Date.now },
+        comment: String,
+    }],
+    tags: [String],
+    history: [{
+        action: String,
+        description: String,
+        author: { type: Schema.Types.ObjectId, ref: 'User' },
+        date: { type: Date, default: Date.now },
+    }],
+    created: { type: Date, default: Date.now },
+    lastUpdated: { type: Date, default: Date.now },
 });
 
 const Task = mongoose.model('Task', taskSchema);

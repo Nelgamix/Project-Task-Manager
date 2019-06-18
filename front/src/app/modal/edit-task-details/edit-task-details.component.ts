@@ -8,7 +8,7 @@ import {ITask, ITaskUpdate} from '../../api.service';
   styleUrls: ['./edit-task-details.component.scss']
 })
 export class EditTaskDetailsComponent implements OnInit, AfterViewInit {
-  @ViewChild('name') nameInput: ElementRef;
+  @ViewChild('name', {static: true}) nameInput: ElementRef;
   @Input() task: ITask;
 
   taskUpdate: ITaskUpdate = {

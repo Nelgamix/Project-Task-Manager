@@ -22,13 +22,13 @@ import {EditProjectDetailsComponent} from '../modal/edit-project-details/edit-pr
   styleUrls: ['./project.component.scss']
 })
 export class ProjectComponent implements OnInit {
-  @ViewChild('tableDate') tableDate: TemplateRef<any>;
-  @ViewChild('tableState') tableState: TemplateRef<any>;
-  @ViewChild('tableCategory') tableCategory: TemplateRef<any>;
-  @ViewChild('tablePriority') tablePriority: TemplateRef<any>;
-  @ViewChild('tableEstimatedTime') tableEstimatedTime: TemplateRef<any>;
-  @ViewChild('tableDifficulty') tableDifficulty: TemplateRef<any>;
-  @ViewChild('tableType') tableType: TemplateRef<any>;
+  @ViewChild('tableDate', {static: false}) tableDate: TemplateRef<any>;
+  @ViewChild('tableState', {static: false}) tableState: TemplateRef<any>;
+  @ViewChild('tableCategory', {static: false}) tableCategory: TemplateRef<any>;
+  @ViewChild('tablePriority', {static: false}) tablePriority: TemplateRef<any>;
+  @ViewChild('tableEstimatedTime', {static: false}) tableEstimatedTime: TemplateRef<any>;
+  @ViewChild('tableDifficulty', {static: false}) tableDifficulty: TemplateRef<any>;
+  @ViewChild('tableType', {static: false}) tableType: TemplateRef<any>;
 
   loading = false;
   error: string;

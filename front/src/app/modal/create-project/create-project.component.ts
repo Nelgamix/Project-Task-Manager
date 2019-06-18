@@ -8,7 +8,7 @@ import {ApiService, IProjectCreate} from '../../api.service';
   styleUrls: ['./create-project.component.scss']
 })
 export class CreateProjectComponent implements AfterViewInit {
-  @ViewChild('name') nameInput: ElementRef;
+  @ViewChild('name', {static: true}) nameInput: ElementRef;
   @Input() userId: string;
 
   loading = false;

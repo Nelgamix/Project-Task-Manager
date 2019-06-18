@@ -8,7 +8,7 @@ import {IProject, IProjectUpdate} from '../../api.service';
   styleUrls: ['./edit-project-details.component.scss']
 })
 export class EditProjectDetailsComponent implements OnInit, AfterViewInit {
-  @ViewChild('name') nameInput: ElementRef;
+  @ViewChild('name', {static: true}) nameInput: ElementRef;
   @Input() project: IProject;
 
   projectUpdate: IProjectUpdate = {

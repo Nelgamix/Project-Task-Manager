@@ -8,7 +8,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const cookieParser = require('cookie-parser');
 const User = require('./src/schemas/User');
 
-const PORT = 3001;
+const PORT = 3000;
 const app = express();
 
 // Config Mongoose
@@ -18,7 +18,7 @@ mongoose.connect(`mongodb://localhost/project-task-manager`, { useNewUrlParser: 
     // Passport config
     passport.use(
         new LocalStrategy({
-            usernameField: 'name',
+            usernameField: 'username',
             passwordField: 'password',
         }, (username, password, done) => {
             User.findOne({name: username}, (err, user) => {

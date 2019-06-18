@@ -20,8 +20,8 @@ import {EditTaskDetailsComponent} from '../modal/edit-task-details/edit-task-det
   styleUrls: ['./task.component.scss']
 })
 export class TaskComponent implements OnInit {
-  @ViewChild('textEditorTodo') textEditorTodo: TdTextEditorComponent;
-  @ViewChild('textEditorLog') textEditorLog: TdTextEditorComponent;
+  @ViewChild('textEditorTodo', {static: false}) textEditorTodo: TdTextEditorComponent;
+  @ViewChild('textEditorLog', {static: false}) textEditorLog: TdTextEditorComponent;
 
   loading = false;
   error: string;

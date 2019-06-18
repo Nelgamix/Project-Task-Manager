@@ -3,9 +3,10 @@ const Project = require('../schemas/Project');
 const User = require('../schemas/User');
 const Task = require('../schemas/Task');
 const middleware = require('./middleware');
+const utils = require('../utils');
 const router = express.Router();
 
-const defaultPriorities = [
+/*const defaultPriorities = [
     {id: 'low', name: 'Low'},
     {id: 'medium', name: 'Medium'},
     {id: 'high', name: 'High'},
@@ -39,9 +40,43 @@ const defaultCategories = [];
 const defaultTypes = [
     {id: 'bugfix', name: 'Bugfix'},
     {id: 'feature', name: 'Feature'},
+];*/
+
+const defaultMetadata = [
+    {
+        id: 'state',
+        name: 'State',
+        description: 'State of the ticket',
+        values: [
+            {
+                id: 'open',
+                name: 'Open',
+                value: 0,
+            },
+            {
+                id: 'in-progress',
+                name: 'In Progress',
+                value: 1,
+            },
+            {
+                id: 'closed',
+                name: 'Closed',
+                value: 2,
+            },
+        ]
+    },
 ];
 
-function get(req, res) {
+const defaultTexts = [
+    {
+        id: 'todo',
+        name: 'Todo',
+        description: '',
+        model: '',
+    }
+];
+
+function reqGet(req, res) {
     const id = req.params.id;
 
     if (!id) {
@@ -53,63 +88,55 @@ function get(req, res) {
             return res.sendStatus(404);
         }
 
-        Promise.all([
+        return Promise.all([
             User.findById(project.userId),
             Task.find({projectId: id})
         ]).then((values) => {
             project._doc.user = values[0];
             project._doc.tasks = values[1];
-            res.json(project);
+            return res.json(project);
         });
     });
 }
 
-function create(req, res) {
-    const userId = req.body.userId;
+function reqCreate(req, res) {
+    const author = req.user._id;
     const name = req.body.name;
     const description = req.body.description || '';
     const links = req.body.links || [];
-    const difficulties = req.body.difficulties || defaultDifficulties;
-    const estimatedTimes = req.body.estimatedTimes || defaultEstimatedTimes;
-    const priorities = req.body.priorities || defaultPriorities;
-    const types = req.body.types || defaultTypes;
-    const states = req.body.states || defaultStates;
-    const categories = req.body.categories || defaultCategories;
+    const users = [];
+    const metadata = defaultMetadata;
+    const texts = defaultTexts;
 
-    if (!userId || !name) {
+    if (!author || !name) {
         return res.sendStatus(400);
     }
 
     const project = new Project({
-        userId,
+        author,
         name,
         description,
         links,
-        difficulties,
-        estimatedTimes,
-        priorities,
-        types,
-        states,
-        categories,
+        users,
+        metadata,
+        texts,
     });
 
     project.save().then(() => res.json(project));
 }
 
-function update(req, res) {
-    const id = req.params.id;
-    // Fields changeable
-    const name = req.body.name;
-    const description = req.body.description;
-    const links = req.body.links;
-    const difficulties = req.body.difficulties;
-    const estimatedTimes = req.body.estimatedTimes;
-    const priorities = req.body.priorities;
-    const types = req.body.types;
-    const states = req.body.states;
-    const categories = req.body.categories;
+const updateObjectModel = {
+    canCreate: ['users', 'metadata', 'metadata.*[id].values'],
+    canUpdate: ['name', 'description', 'users.*[user]', 'links.*[id]', 'metadata.*[id]', 'metadata.*[id].values.*[id]', 'texts.*[id]'],
+    canDelete: ['users.*[user]', 'metadata.*[id]', 'metadata.*[id].values.*[id]'],
+};
 
-    if (!id) {
+const updater = new utils.Updater(updateObjectModel);
+
+function reqUpdate(req, res) {
+    const id = req.params.id;
+
+    if (!id || !req.body || req.body.length === 0) {
         return res.sendStatus(400);
     }
 
@@ -118,22 +145,20 @@ function update(req, res) {
             return res.sendStatus(404);
         }
 
-        if (name) project.name = name;
-        if (description) project.description = description;
-        if (links) project.links = links;
-        if (difficulties) project.difficulties = difficulties;
-        if (estimatedTimes) project.estimatedTimes = estimatedTimes;
-        if (priorities) project.priorities = priorities;
-        if (types) project.types = types;
-        if (states) project.states = states;
-        if (categories) project.categories = categories;
-        project.lastUpdated = Date.now();
+        let changed = false;
+        for (const change of req.body) {
+            changed = updater.updateObject(project, change) || changed;
+        }
 
-        project.save().then(() => res.json(project));
+        if (changed) {
+            return project.save().then(() => res.sendStatus(200));
+        }
+
+        return res.sendStatus(204);
     });
 }
 
-function fDelete(req, res) {
+function reqDelete(req, res) {
     const id = req.params.id;
 
     if (!id) {
@@ -142,15 +167,15 @@ function fDelete(req, res) {
 
     Promise.all([
         Project.findByIdAndDelete(id),
-        Task.deleteMany({projectId: id})
+        Task.deleteMany({project: id})
     ]).then(() => {
         res.json({});
     })
 }
 
-router.get('/:id', middleware.auth, get);
-router.post('/', middleware.auth, create);
-router.put('/:id', middleware.auth, update);
-router.delete('/:id', middleware.auth, fDelete);
+router.get('/:id', middleware.auth, reqGet);
+router.post('/', middleware.auth, reqCreate);
+router.put('/:id', middleware.auth, reqUpdate);
+router.delete('/:id', middleware.auth, reqDelete);
 
 module.exports = router;

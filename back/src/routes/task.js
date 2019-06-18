@@ -1,11 +1,13 @@
 const express = require('express');
+const Schema = require('mongoose').Schema;
 const Project = require('../schemas/Project');
 const Task = require('../schemas/Task');
 const User = require('../schemas/User');
 const middleware = require('./middleware');
+const utils = require('../utils');
 const router = express.Router();
 
-function get(req, res) {
+function reqGet(req, res) {
     const id = req.params.id;
 
     if (!id) {
@@ -17,72 +19,63 @@ function get(req, res) {
             return res.sendStatus(404);
         }
 
-        Promise.all([
+        return Promise.all([
             Project.findById(task.projectId),
             User.findById(task.userId),
         ]).then(val => {
             task._doc.project = val[0];
             task._doc.user = val[1];
-            res.json(task);
+            return res.json(task);
         });
     });
 }
 
-function create(req, res) {
-    const userId = req.body.userId;
-    const projectId = req.body.projectId;
+function reqCreate(req, res) {
+    const author = req.user._id;
+    const project = new Schema.ObjectId(req.body.project);
     const name = req.body.name;
-    const state = req.body.state;
     const description = req.body.description || '';
-    const priority = req.body.priority || '';
-    const difficulty = req.body.difficulty || '';
-    const category = req.body.category || '';
-    const type = req.body.type || '';
-    const links = req.body.links || [];
-    const estimatedTime = req.body.estimatedTime || '';
-    const todo = req.body.todo || '';
-    const log = req.body.log || '';
+    const assignees = [];
+    const links = [];
+    const texts = {}; // TODO: extend from project
+    const metadata = {}; // TODO: extend from project
+    const goals = [];
+    const comments = [];
     const tags = req.body.tags || [];
+    const history = [];
 
-    if (!userId || !projectId || !name || !state) {
+    if (!author || !project || !name) {
         return res.sendStatus(400);
     }
 
     const task = new Task({
-        userId,
-        projectId,
+        author,
+        project,
         name,
         description,
-        priority,
-        difficulty,
-        category,
-        type,
+        assignees,
         links,
-        estimatedTime,
-        todo,
-        log,
-        state,
+        texts,
+        metadata,
+        goals,
+        comments,
         tags,
+        history,
     });
 
     task.save().then(() => res.json(task));
 }
 
-function update(req, res) {
+const updateObjectModel = {
+    canCreate: ['users', 'metadata', 'metadata.*.values'],
+    canUpdate: ['name', 'description', 'users.*', 'links.*', 'metadata.*', 'metadata.*.values.*', 'texts.*'],
+    canDelete: ['users.*', 'metadata.*', 'metadata.*.values.*'],
+};
+
+const updater = new utils.Updater(updateObjectModel);
+
+function reqUpdate(req, res) {
     const id = req.params.id;
-    // Fields changeable
-    const name = req.body.name;
-    const description = req.body.description;
-    const priority = req.body.priority;
-    const difficulty = req.body.difficulty;
-    const category = req.body.category;
-    const type = req.body.type;
-    const links = req.body.links;
-    const estimatedTime = req.body.estimatedTime;
-    const todo = req.body.todo;
-    const log = req.body.log;
-    const state = req.body.state;
-    const tags = req.body.tags;
 
     if (!id) {
         return res.sendStatus(400);
@@ -93,48 +86,35 @@ function update(req, res) {
             return res.sendStatus(404);
         }
 
-        if (name) task.name = name;
-        if (description) task.description = description;
-        if (priority) task.priority = priority;
-        if (difficulty) task.difficulty = difficulty;
-        if (category) task.category = category;
-        if (type) task.type = type;
-        if (links) task.links = links;
-        if (estimatedTime) task.estimatedTime = estimatedTime;
-        if (todo) task.todo = todo;
-        if (log) task.log = log;
-        if (state) task.state = state;
-        if (tags) task.tags = tags;
-        task.lastUpdated = Date.now();
+        let changed = false;
+        for (const change of req.body) {
+            changed = updater.updateObject(task, change) || changed;
+        }
 
-        Project.findById(task.projectId).then(project => {
-            project.lastUpdated = Date.now();
+        if (changed) {
+            task.lastUpdated = Date.now();
+            return task.save().then(() => res.sendStatus(200));
+        }
 
-            Promise.all([
-                project.save(),
-                task.save(),
-            ]).then(() => {
-                res.json(task);
-            });
-        })
+        return res.sendStatus(204);
     });
 }
 
-function fDelete(req, res) {
+function reqDelete(req, res) {
     const id = req.params.id;
 
     if (!id) {
         return res.sendStatus(400);
     }
 
-    Task.findByIdAndDelete(id).then(task => {
-        res.json(task);
+    Task.findByIdAndDelete(id).then(() => {
+        return res.sendStatus(200);
     });
 }
 
-router.get('/:id', middleware.auth, get);
-router.post('/', middleware.auth, create);
-router.put('/:id', middleware.auth, update);
-router.delete('/:id', middleware.auth, fDelete);
+router.get('/:id', middleware.auth, reqGet);
+router.post('/', middleware.auth, reqCreate);
+router.put('/:id', middleware.auth, reqUpdate);
+router.delete('/:id', middleware.auth, reqDelete);
 
 module.exports = router;
