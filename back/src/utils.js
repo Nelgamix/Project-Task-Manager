@@ -1,6 +1,5 @@
 const set = require('lodash/set');
 const unset = require('lodash/unset');
-const has = require('lodash/has');
 const assign = require('lodash/assign');
 const remove = require('lodash/remove');
 const find = require('lodash/find');
@@ -99,10 +98,6 @@ class Updater {
     }
 
     findInObject(object, regs, path) {
-        if (!has(object, path)) {
-            // return false;
-        }
-
         for (const reg of regs) {
             if (reg.regex.test(path)) {
                 let match = path.match(reg.regex) || [];
@@ -136,6 +131,8 @@ class Updater {
             if (token === '*') {
                 propName = modelItem.propNames[arrIdx];
                 propValue = modelValue[arrIdx];
+                // WARNING: do not do a strict equals. We compare Mongoose ObjectId
+                // to straight Strings.
                 finalObject = find(finalObject, p => p[propName] == propValue);
             } else {
                 finalObject = finalObject[token];
@@ -157,6 +154,8 @@ class Updater {
             if (modelItem.lastPathType === 'object') {
                 unset(finalObject, lastToken);
             } else if (modelItem.lastPathType === 'array') {
+                // WARNING: do not do a strict equals. We compare Mongoose ObjectId
+                // to straight Strings.
                 remove(lastObject, p => p[propName] == propValue);
             }
         }
@@ -182,32 +181,34 @@ class Updater {
         let found;
         let regex;
 
+        const exec = function (model, onFoundFn) {
+            result = this.findInObject(object, model, change.path);
+            if (!result) {
+                return;
+            }
+
+            [found, regex] = result;
+            if (found) {
+                onFoundFn();
+                updated = true;
+            }
+        }
+
         switch (change.type.toLocaleLowerCase()) {
             case UpdateType.Create:
-                [found, regex] = this.findInObject(object, this.model.canCreate, change.path);
-                if (found) {
+                exec(this.model.canCreate, () => {
                     this.create(object, found, regex, change.value);
-                    updated = true;
-                }
+                });
                 break;
             case UpdateType.Update:
-                result = this.findInObject(object, this.model.canUpdate, change.path);
-                if (!result) {
-                    break;
-                }
-
-                [found, regex] = result;
-                if (found) {
+                exec(this.model.canUpdate, () => {
                     this.update(object, found, regex, change.value);
-                    updated = true;
-                }
+                });
                 break;
             case UpdateType.Delete:
-                [found, regex] = this.findInObject(object, this.model.canDelete, change.path);
-                if (found) {
+                exec(this.model.canDelete, () => {
                     this.delete(object, found, regex);
-                    updated = true;
-                }
+                });
                 break;
         }
 
@@ -216,7 +217,7 @@ class Updater {
 }
 
 /*
-Update schematic:
+Update examples:
 [
     {
         type: 'Update',
