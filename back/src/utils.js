@@ -1,9 +1,9 @@
 const set = require('lodash/set');
 const unset = require('lodash/unset');
-const get = require('lodash/get');
 const has = require('lodash/has');
 const assign = require('lodash/assign');
 const remove = require('lodash/remove');
+const find = require('lodash/find');
 
 const excludeKeys = ['__v', 'password', '_id'];
 
@@ -44,7 +44,7 @@ const UpdateType = Object.freeze({
     Delete: 'delete',
 });
 
-const idRegex = /\[([a-z0-9]+)]/g;
+const idRegex = /\[([_a-zA-Z0-9]+)]/g;
 class Updater {
     constructor(model) {
         this.setModel(model);
@@ -100,13 +100,16 @@ class Updater {
 
     findInObject(object, regs, path) {
         if (!has(object, path)) {
-            return false;
+            // return false;
         }
 
         for (const reg of regs) {
             if (reg.regex.test(path)) {
-                const match = reg.regex.match(path);
-                return [reg, match.slice(1)];
+                let match = path.match(reg.regex) || [];
+                if (match.length > 1) {
+                    match = match.slice(1);
+                }
+                return [reg, match];
             }
         }
 
@@ -126,77 +129,83 @@ class Updater {
         let tokens = modelItem.path.split('.');
         let lastToken;
 
-        for (const token in tokens) {
+        for (const token of tokens) {
             lastToken = token;
             lastObject = finalObject;
 
             if (token === '*') {
                 propName = modelItem.propNames[arrIdx];
                 propValue = modelValue[arrIdx];
-                finalObject = finalObject.find(p => p[propName] === propValue);
+                finalObject = find(finalObject, p => p[propName] == propValue);
             } else {
                 finalObject = finalObject[token];
             }
         }
 
-        if (operationType === 'update') {
+        if (operationType === UpdateType.Update) {
             // We need to set the last Object
             if (modelItem.lastPathType === 'object') {
                 set(lastObject, lastToken, value);
             } else if (modelItem.lastPathType === 'array') {
                 assign(finalObject, value);
             }
-        } else if (operationType === 'create') {
-            if (modelItem.lastPathType === 'array') {
-                finalObject.push(value);
-            }
-        } else if (operationType === 'delete') {
+        } else if (operationType === UpdateType.Create) {
+            // In the case of a create, last object is always
+            // an array (we can't create something in an object).
+            finalObject.push(value);
+        } else if (operationType === UpdateType.Delete) {
             if (modelItem.lastPathType === 'object') {
                 unset(finalObject, lastToken);
             } else if (modelItem.lastPathType === 'array') {
-                remove(lastObject, p => p[propName] === propValue);
+                remove(lastObject, p => p[propName] == propValue);
             }
         }
 
         return finalObject;
     }
 
-    update(object, modelItem, modelValue, value) {
-        this.doInObject(object, modelItem, modelValue, 'update', value);
+    create(object, modelItem, modelValue, value) {
+        this.doInObject(object, modelItem, modelValue, UpdateType.Create, value);
     }
 
-    create(object, modelItem, modelValue, value) {
-        this.doInObject(object, modelItem, modelValue, 'create', value);
+    update(object, modelItem, modelValue, value) {
+        this.doInObject(object, modelItem, modelValue, UpdateType.Update, value);
     }
 
     delete(object, modelItem, modelValue) {
-        this.doInObject(object, modelItem, modelValue, 'delete');
+        this.doInObject(object, modelItem, modelValue, UpdateType.Delete);
     }
 
     updateObject(object, change) {
         let updated = false;
+        let result;
         let found;
         let regex;
 
-        switch (change.type) {
+        switch (change.type.toLocaleLowerCase()) {
             case UpdateType.Create:
                 [found, regex] = this.findInObject(object, this.model.canCreate, change.path);
                 if (found) {
-                    this.update(object, regex, found, change.value);
+                    this.create(object, found, regex, change.value);
                     updated = true;
                 }
                 break;
             case UpdateType.Update:
-                [found, regex] = this.findInObject(object, this.model.canUpdate, change.path);
+                result = this.findInObject(object, this.model.canUpdate, change.path);
+                if (!result) {
+                    break;
+                }
+
+                [found, regex] = result;
                 if (found) {
-                    this.create(object, regex, found, change.value);
+                    this.update(object, found, regex, change.value);
                     updated = true;
                 }
                 break;
             case UpdateType.Delete:
                 [found, regex] = this.findInObject(object, this.model.canDelete, change.path);
                 if (found) {
-                    this.delete(object, regex, found);
+                    this.delete(object, found, regex);
                     updated = true;
                 }
                 break;

@@ -16,6 +16,7 @@ User.find({name: 'admin'}).then(users => {
                 role: 'admin',
                 password: hash,
             }).save();
+            console.log('Admin account created.');
         });
     }
 });

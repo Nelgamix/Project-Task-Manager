@@ -11,23 +11,19 @@ const projectSchema = new mongoose.Schema({
         added: { type: Date, default: Date.now },
     }],
     links: [{
-        id: Number,
         name: String,
         description: String,
         url: String,
     }],
     metadata: [{
-        id: String,
         name: String,
         description: String,
         values: [{
-            id: String,
             name: String,
             value: Number,
         }],
     }],
     texts: [{
-        id: String,
         name: String,
         description: String,
         model: String,

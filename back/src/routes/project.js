@@ -126,9 +126,9 @@ function reqCreate(req, res) {
 }
 
 const updateObjectModel = {
-    canCreate: ['users', 'metadata', 'metadata.*[id].values'],
-    canUpdate: ['name', 'description', 'users.*[user]', 'links.*[id]', 'metadata.*[id]', 'metadata.*[id].values.*[id]', 'texts.*[id]'],
-    canDelete: ['users.*[user]', 'metadata.*[id]', 'metadata.*[id].values.*[id]'],
+    canCreate: ['users', 'links', 'texts', 'metadata', 'metadata.*[_id].values'],
+    canUpdate: ['name', 'description', 'users.*[user]', 'links.*[_id]', 'metadata.*[_id]', 'metadata.*[_id].values.*[_id]', 'texts.*[_id]'],
+    canDelete: ['users.*[user]', 'links.*[_id]', 'texts.*[_id]', 'metadata.*[_id]', 'metadata.*[_id].values.*[_id]'],
 };
 
 const updater = new utils.Updater(updateObjectModel);
@@ -151,7 +151,8 @@ function reqUpdate(req, res) {
         }
 
         if (changed) {
-            return project.save().then(() => res.sendStatus(200));
+            project.lastUpdated = Date.now();
+            return project.save().then(() => res.json(project));
         }
 
         return res.sendStatus(204);

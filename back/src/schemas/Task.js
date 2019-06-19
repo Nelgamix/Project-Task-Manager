@@ -8,7 +8,6 @@ const taskSchema = new mongoose.Schema({
     description: String,
     assignees: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     links: [{
-        id: Number,
         name: String,
         description: String,
         url: String,
@@ -16,12 +15,10 @@ const taskSchema = new mongoose.Schema({
     texts: Schema.Types.Mixed,
     metadata: Schema.Types.Mixed,
     goals: [{
-        id: Number,
         name: String,
         done: Boolean,
     }],
     comments: [{
-        id: Number,
         author: { type: Schema.Types.ObjectId, ref: 'User' },
         date: { type: Date, default: Date.now },
         comment: String,
