@@ -6,6 +6,8 @@ const middleware = require('./middleware');
 const utils = require('../utils');
 const router = express.Router();
 
+const remove = require('lodash/remove');
+
 /*const defaultPriorities = [
     {id: 'low', name: 'Low'},
     {id: 'medium', name: 'Medium'},
@@ -76,6 +78,126 @@ const defaultTexts = [
     }
 ];
 
+/**
+ * Method to get the difference between two arrays.
+ * Returns the difference in three arrays:
+ *   objectsToCreate
+ *   objectsToDelete
+ *   objectsToUpdate
+ * @param arrayRef
+ * @param arrayDiff
+ * @param findFn search for element in array. Must return an index. -1 if not found
+ * @param updateFn find difference between new and old object.
+ */
+function diff(arrayRef, arrayDiff, findFn, updateFn) {
+    const objectsToCreate = arrayDiff.slice();
+    const objectsToDelete = [];
+    const objectsToUpdate = [];
+    const objectsToUpdateTmp = [];
+
+    let tmp;
+    // eg: ref: [1], diff: [1, 2, 3]
+    for (const e of arrayRef) {
+        tmp = findFn(objectsToCreate, e);
+        if (tmp >= 0) {
+            objectsToUpdateTmp.push([e, objectsToCreate[tmp]]);
+            objectsToCreate.splice(tmp, 1);
+        }
+
+        objectsToDelete.push(e);
+    }
+
+    let changed;
+    for (const objectToUpdate of objectsToUpdateTmp) {
+        changed = updateFn(...objectToUpdate);
+        if (changed) {
+            objectsToUpdate.push(objectToUpdate[0]);
+        }
+    }
+
+    return [objectsToCreate, objectsToUpdate, objectsToDelete];
+}
+
+function updateName(project, name) {
+    if (!name) {
+        return false;
+    }
+
+    project.name = name;
+
+    return true;
+}
+
+function updateDescription(project, description) {
+    if (!description) {
+        return false;
+    }
+
+    project.description = description;
+
+    return true;
+}
+
+function updateUser(source, update) {
+    if (update.right) {
+        source.right = update.right;
+    }
+}
+
+function updateUsers(project, users) {
+    if (!users) {
+        return false;
+    }
+
+    const [usersToCreate, usersToUpdate, usersToDelete] = diff(
+      project.users,
+      users,
+      (arr, elem) => arr.findIndex(e => e.user == elem.user),
+      (n, o) => {
+          if (n.right !== o.right) {
+              return true;
+          }
+      }
+    );
+
+    for (const user of usersToCreate) {
+        project.users.push(user);
+    }
+
+    for (const user of usersToDelete) {
+        remove(project.users, u => u.id == user.id);
+    }
+
+    for (const user of usersToUpdate) {
+        const us = project.users.find(u => u.id == user.id);
+        updateUser(us, user);
+    }
+
+    return usersToCreate.length > 0
+        || usersToDelete.length > 0
+        || usersToUpdate.length > 0;
+}
+
+function updateLinks(project, links) {
+    if (!links) {
+        return false;
+    }
+
+    project.links = links;
+
+    return true;
+}
+
+function updateMetadata(project, metadata) {
+    if (!metadata) {
+        return false;
+    }
+
+    project.metadata = metadata;
+
+    return true;
+}
+
 function reqGet(req, res) {
     const id = req.params.id;
 
@@ -125,18 +247,10 @@ function reqCreate(req, res) {
     project.save().then(() => res.json(project));
 }
 
-const updateObjectModel = {
-    canCreate: ['users', 'links', 'texts', 'metadata', 'metadata.*[_id].values'],
-    canUpdate: ['name', 'description', 'users.*[user]', 'links.*[_id]', 'metadata.*[_id]', 'metadata.*[_id].values.*[_id]', 'texts.*[_id]'],
-    canDelete: ['users.*[user]', 'links.*[_id]', 'texts.*[_id]', 'metadata.*[_id]', 'metadata.*[_id].values.*[_id]'],
-};
-
-const updater = new utils.Updater(updateObjectModel);
-
 function reqUpdate(req, res) {
     const id = req.params.id;
 
-    if (!id || !req.body || req.body.length === 0) {
+    if (!id || !req.body) {
         return res.sendStatus(400);
     }
 
@@ -145,17 +259,19 @@ function reqUpdate(req, res) {
             return res.sendStatus(404);
         }
 
+        const body = req.body;
         let changed = false;
-        for (const change of req.body) {
-            changed = updater.updateObject(project, change) || changed;
-        }
+        changed = changed || updateName(project, body.name);
+        changed = changed || updateDescription(project, body.name);
+        changed = changed || updateUsers(project, body.name);
+        changed = changed || updateLinks(project, body.name);
+        changed = changed || updateMetadata(project, body.name);
 
         if (changed) {
-            project.lastUpdated = Date.now();
             return project.save().then(() => res.json(project));
         }
 
-        return res.sendStatus(204);
+        return res.sendStatus(200);
     });
 }
 
