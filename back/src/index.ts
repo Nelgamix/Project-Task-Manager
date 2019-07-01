@@ -1,18 +1,26 @@
-const express = require('express');
-const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const cookieParser = require('cookie-parser');
-const User = require('./src/schemas/User');
+import express from 'express';
+import session from 'express-session';
+import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
+import passport from 'passport';
+import {Strategy as LocalStrategy} from 'passport-local';
+import cookieParser from 'cookie-parser';
+import connectMongo from 'connect-mongo';
+import {IUser, User} from './schemas/User';
+// Routes
+import project from './routes/project/routes';
+import task from './routes/task/routes';
+import user from './routes/user/routes';
 
+// Constant
 const PORT = 3000;
 const HOST = 'localhost';
 const BASE = 'project-task-manager';
+const SECRET = 'project-task-manager-project-back';
 
 const app = express();
+
+const MongoStore = connectMongo(session);
 
 // TODO: configure types
 
@@ -28,7 +36,7 @@ mongoose.connect(`mongodb://${HOST}/${BASE}`, { useNewUrlParser: true }).then(()
         usernameField: 'username',
         passwordField: 'password',
       }, (username: string, password: string, done: (err: any, obj?: any, errObj?: any) => void) => {
-        User.findOne({name: username}, (err: any, user: any) => {
+        User.findOne({name: username}, (err: any, user: IUser) => {
           if (err) {
             return done(err);
           }
@@ -37,7 +45,7 @@ mongoose.connect(`mongodb://${HOST}/${BASE}`, { useNewUrlParser: true }).then(()
             return done(null, false, { message: 'Incorrect username.' });
           }
 
-          user.validatePassword(password, (res: any) => {
+          (user as any).validatePassword(password, (res: any) => {
             if (!res) {
               done(null, false, { message: 'Incorrect password.' });
             } else {
@@ -61,7 +69,7 @@ mongoose.connect(`mongodb://${HOST}/${BASE}`, { useNewUrlParser: true }).then(()
   });
 
   const sessionMiddleware = session({
-    secret: 'project-task-manager-project-back',
+    secret: SECRET,
     resave: false,
     saveUninitialized: false,
     store: new MongoStore({mongooseConnection: mongoose.connection})
@@ -75,9 +83,9 @@ mongoose.connect(`mongodb://${HOST}/${BASE}`, { useNewUrlParser: true }).then(()
 
   const router = express.Router();
 
-  router.use('/user', require('./src/routes/user'));
-  router.use('/project', require('./src/routes/project'));
-  router.use('/task', require('./src/routes/task'));
+  router.use('/user', user);
+  router.use('/project', project);
+  router.use('/task', task);
 
   app.use('/api', router);
 

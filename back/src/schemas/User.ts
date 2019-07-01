@@ -14,9 +14,9 @@ export interface IUser extends Document {
   email: string;
   image: string;
   role: UserRole;
-  created: Date;
-  updated: Date;
-  lastLogin: Date;
+  created: number;
+  updated: number;
+  lastLogin: number;
   password: string;
 }
 
@@ -72,14 +72,8 @@ userSchema.methods.validatePassword = function(password: string, cb: (validated:
       });
 };
 
-userSchema.statics.getPasswordHash = function(password: string, cb: (hash: string | undefined) => void) {
-  bcrypt.hash(password, 10)
-      .then((hash: string) => {
-        cb(hash);
-      })
-      .catch(() => {
-        cb(undefined);
-      });
-};
+export function getPasswordHash(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
+}
 
 export const User = mongoose.model<IUser>('User', userSchema);

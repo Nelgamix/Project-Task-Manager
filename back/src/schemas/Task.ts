@@ -46,8 +46,8 @@ export interface ITask extends Document {
   comments: ITaskComment[];
   tags: string[];
   history: ITaskHistory[];
-  created: Date;
-  updated: Date;
+  created: number;
+  updated: number;
 }
 
 export const TaskRefModel = {

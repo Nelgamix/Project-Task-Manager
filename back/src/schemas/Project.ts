@@ -38,8 +38,8 @@ export interface IProject extends Document {
   links: ILink[];
   metadata: IProjectMetadata[];
   texts: IProjectText[];
-  created: Date;
-  updated: Date;
+  created: number;
+  updated: number;
 }
 
 export const ProjectRefModel = {

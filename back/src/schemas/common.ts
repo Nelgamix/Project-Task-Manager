@@ -5,7 +5,7 @@ export const LinkModel = {
 };
 
 export const DateModel = {
-  type: Date,
+  type: Number,
   default: Date.now,
 };
 
