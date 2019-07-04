@@ -1,95 +1,58 @@
-import mongoose, {Document} from 'mongoose';
-import {DateModel, ILink, LinkModel} from './common';
-import {IUser, UserRefModel} from './User';
+import {prop, Ref, Typegoose} from "typegoose";
+import {User} from "./User";
+import {Schema} from "mongoose";
+import ObjectId = Schema.Types.ObjectId;
 
 export enum ProjectRight {
   Admin,
   User,
 }
 
-export interface IProjectUser extends Document {
-  user: IUser['_id'];
-  right: ProjectRight;
-  added: Date;
+export class ProjectUser {
+  _id?: ObjectId;
+  @prop() user?: Ref<User>;
+  @prop() right?: ProjectRight;
+  @prop() added?: number;
 }
 
-export interface IProjectMetadataValue extends Document {
-  name: string;
-  value: string;
+export class ProjectLink extends Typegoose {
+  _id?: ObjectId;
+  @prop() name?: string;
+  @prop() description?: string;
+  @prop() url?: string;
 }
 
-export interface IProjectMetadata extends Document {
-  name: string;
-  description: string;
-  values: IProjectMetadataValue[];
+export class ProjectMetadata extends Typegoose {
+  _id?: ObjectId;
+  @prop() name?: string;
+  @prop() description?: string;
+  @prop() values?: ProjectMetadataValue[];
 }
 
-export interface IProjectText extends Document {
-  name: string;
-  description: string;
-  skeleton: string;
+export class ProjectMetadataValue extends Typegoose {
+  _id?: ObjectId;
+  @prop() name?: string;
+  @prop() value?: number;
 }
 
-export interface IProject extends Document {
-  author: IUser['_id'];
-  name: string;
-  description: string;
-  users: IProjectUser[];
-  links: ILink[];
-  metadata: IProjectMetadata[];
-  texts: IProjectText[];
-  created: number;
-  updated: number;
+export class ProjectText extends Typegoose {
+  _id?: ObjectId;
+  @prop() name?: string;
+  @prop() description?: string;
+  @prop() skeleton?: string;
 }
 
-export const ProjectRefModel = {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'Project'
-};
+export class Project extends Typegoose {
+  _id?: ObjectId;
+  @prop() author?: Ref<User>;
+  @prop() name?: string;
+  @prop() description?: string;
+  @prop() users?: ProjectUser[];
+  @prop() links?: ProjectLink[];
+  @prop() metadata?: ProjectMetadata[];
+  @prop() texts?: ProjectText[];
+  @prop() created?: number;
+  @prop() updated?: number;
+}
 
-const NameModel = {
-  type: String,
-  required: true,
-};
-
-const DescriptionModel = {
-  type: String,
-  default: '',
-};
-
-const UserModel = {
-  user: UserRefModel,
-  right: {type: String, enum: ProjectRight},
-  added: DateModel,
-};
-
-const MetadataModel = {
-  name: String,
-  description: String,
-  values: [{
-    name: String,
-    value: Number,
-  }],
-};
-
-const TextModel = {
-  name: String,
-  description: String,
-  skeleton: String,
-};
-
-const schema = {
-  author: UserRefModel,
-  name: NameModel,
-  description: DescriptionModel,
-  users: [UserModel],
-  links: [LinkModel],
-  metadata: [MetadataModel],
-  texts: [TextModel],
-  created: DateModel,
-  updated: DateModel,
-};
-
-const projectSchema = new mongoose.Schema(schema);
-
-export const Project = mongoose.model<IProject>('Project', projectSchema);
+export const ProjectModel = new Project().getModelForClass(Project);

@@ -1,45 +1,77 @@
 import {Request, Response, Router} from "express";
-import {IProject, Project} from "../../schemas/Project";
 import {updateUsers} from "./users";
 import {updateLinks} from "./links";
 import {updateMetadata} from "./metadata";
 import {updateTexts} from "./texts";
-import {Task} from "../../schemas/Task";
+import {TaskModel} from "../../schemas/Task";
 import {auth} from "../middleware";
 import {updateDescription, updateName} from "./project";
+import {Project, ProjectModel} from "../../schemas/Project";
+import {InstanceType} from "typegoose";
 
 const router = Router();
 
 export default router;
 
-const defaultMetadata = [
+/*const defaultPriorities = [
+    {id: 'low', name: 'Low'},
+    {id: 'medium', name: 'Medium'},
+    {id: 'high', name: 'High'},
+    {id: 'critical', name: 'Critical'},
+];
+
+const defaultDifficulties = [
+    {id: 'easy', name: 'Easy'},
+    {id: 'medium', name: 'Medium'},
+    {id: 'hard', name: 'Hard'},
+];
+
+const defaultEstimatedTimes = [
+    {id: 'short', name: 'Short (1-2 hour)'},
+    {id: 'medium', name: 'Medium (~5 hours)'},
+    {id: 'long', name: 'Long (10+ hours)'},
+];
+
+const defaultStates = [
+    {id: 'open', name: 'Open'},
+    {id: 'closed', name: 'Closed'},
+    {id: 'draft', name: 'Draft'},
+    {id: 'analyse', name: 'To Analyse'},
+    {id: 'implement', name: 'To Implement'},
+    {id: 'fix', name: 'To Fix'},
+    {id: 'document', name: 'To Document'},
+];
+
+const defaultCategories = [];
+
+const defaultTypes = [
+    {id: 'bugfix', name: 'Bugfix'},
+    {id: 'feature', name: 'Feature'},
+];*/
+
+const defaultMetadata: any[] = [
   {
-    id: 'state',
     name: 'State',
     description: 'State of the ticket',
     values: [
       {
-        id: 'open',
         name: 'Open',
-        value: '',
+        value: 0,
       },
       {
-        id: 'in-progress',
         name: 'In Progress',
-        value: '',
+        value: 1,
       },
       {
-        id: 'closed',
         name: 'Closed',
-        value: '',
+        value: 2,
       },
     ]
   },
 ];
 
-const defaultTexts = [
+const defaultTexts: any[] = [
   {
-    id: 'todo',
     name: 'Todo',
     description: '',
     skeleton: '',
@@ -53,50 +85,40 @@ function reqGet(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  Project.findById(id).populate(['author', 'users']).then((project: IProject | null) => {
+  ProjectModel.findById(id).populate(['author', 'users']).then((project: InstanceType<Project> | null) => {
     if (!project) {
       return res.sendStatus(404);
     }
 
     return res.json(project);
   });
-
-  /*Project.findById(id).then(project => {
-      return Promise.all([
-          User.findById(project.userId),
-          Task.find({projectId: id})
-      ]).then((values) => {
-          project._doc.user = values[0];
-          project._doc.tasks = values[1];
-          return res.json(project);
-      });
-  });*/
 }
 
 function reqCreate(req: Request, res: Response) {
   const author = req.user._id;
-  const name = req.body.name;
-  const description = req.body.description || '';
-  const links = req.body.links || [];
-  const users: any[] = [];
-  const metadata = defaultMetadata;
-  const texts = defaultTexts;
 
-  if (!author || !name) {
+  if (!author || !req.body.name) {
     return res.sendStatus(400);
   }
 
-  const project = new Project({
+  const project = new ProjectModel({
     author,
-    name,
-    description,
-    links,
-    users,
-    metadata,
-    texts,
   });
 
-  project.save().then((savedProject: IProject) => res.json(savedProject));
+  let ok = true;
+
+  ok = ok && updateName(project, req.body.name);
+  ok = ok && updateDescription(project, req.body.description, '');
+  ok = ok && updateUsers(project, req.body.users, []);
+  ok = ok && updateLinks(project, req.body.links, []);
+  ok = ok && updateMetadata(project, req.body.metadata, defaultMetadata);
+  ok = ok && updateTexts(project, req.body.texts, defaultTexts);
+
+  if (ok) {
+    return project.save().then((savedProject: InstanceType<Project>) => res.json(savedProject));
+  }
+
+  return res.sendStatus(400);
 }
 
 function reqUpdate(req: Request, res: Response) {
@@ -106,7 +128,7 @@ function reqUpdate(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  Project.findById(id).then((project: IProject | null) => {
+  ProjectModel.findById(id).then((project: InstanceType<Project> | null) => {
     if (!project) {
       return res.sendStatus(404);
     }
@@ -137,8 +159,8 @@ function reqDelete(req: Request, res: Response) {
   }
 
   Promise.all([
-    Project.findByIdAndDelete(id),
-    Task.deleteMany({project: id})
+    ProjectModel.findByIdAndDelete(id),
+    TaskModel.deleteMany({project: id})
   ]).then(() => {
     res.json({});
   });

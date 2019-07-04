@@ -1,111 +1,66 @@
-import mongoose, {Document} from 'mongoose';
-import {DateModel, ILink, LinkModel} from './common';
-import {IUser, UserRefModel} from './User';
-import {IProject, ProjectRefModel} from './Project';
+import {prop, Ref, Typegoose} from "typegoose";
+import {User} from "./User";
+import {Project} from "./Project";
+import {Schema} from "mongoose";
+import ObjectId = Schema.Types.ObjectId;
 
-export enum ITaskAssigneeRole {
+export enum TaskAssigneeRole {
   Analysis,
   Implementation,
   Review,
 }
 
-export interface ITaskAssignee extends Document {
-  user: IUser['_id'];
-  role: ITaskAssigneeRole;
+export class TaskAssignee extends Typegoose {
+  _id?: ObjectId;
+  @prop() user?: Ref<User>;
+  @prop() role?: TaskAssigneeRole;
 }
 
-export interface ITaskGoal extends Document {
-  name: string;
-  done: boolean;
+export class TaskComment extends Typegoose {
+  _id?: ObjectId;
+  @prop() author?: Ref<User>;
+  @prop() date?: number;
+  @prop() comment?: string;
 }
 
-export interface ITaskComment extends Document {
-  author: IUser['_id'];
-  date: Date;
-  comment: string;
+export class TaskGoal extends Typegoose {
+  _id?: ObjectId;
+  @prop() name?: string;
+  @prop() done?: boolean;
 }
 
-export interface ITaskHistory extends Document {
-  action: string;
-  description: string;
-  payload: any;
-  author: IUser['_id'];
-  date: Date;
+export class TaskLink extends Typegoose {
+  _id?: ObjectId;
+  @prop() name?: string;
+  @prop() description?: string;
+  @prop() url?: string;
 }
 
-export interface ITask extends Document {
-  author: IUser['_id'];
-  project: IProject['_id'];
-  name: string;
-  description: string;
-  assignees: ITaskAssignee[];
-  links: ILink[];
-  texts: any;
-  metadata: any;
-  goals: ITaskGoal[];
-  comments: ITaskComment[];
-  tags: string[];
-  history: ITaskHistory[];
-  created: number;
-  updated: number;
+export class TaskHistory extends Typegoose {
+  _id?: ObjectId;
+  @prop() action?: string;
+  @prop() description?: string;
+  @prop() author?: Ref<User>;
+  @prop() date?: number;
+  // @prop() payload?: string;
 }
 
-export const TaskRefModel = {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'Task',
-};
+export class Task extends Typegoose {
+  _id?: ObjectId;
+  @prop() author?: Ref<User>;
+  @prop() project?: Ref<Project>;
+  @prop() name?: string;
+  @prop() description?: string;
+  @prop() assignees?: TaskAssignee[];
+  @prop() links?: TaskLink[];
+  @prop() texts?: any;
+  @prop() metadata?: any;
+  @prop() goals?: TaskGoal[];
+  @prop() comments?: TaskComment[];
+  @prop() tags?: string[];
+  @prop() history?: TaskHistory[];
+  @prop() created?: number;
+  @prop() updated?: number;
+}
 
-const NameModel = {
-  type: String,
-  required: true,
-};
-
-const DescriptionModel = {
-  type: String,
-  default: '',
-};
-
-const AssigneeModel = {
-  user: UserRefModel,
-  role: {type: String, enum: ITaskAssigneeRole},
-};
-
-const GoalModel = {
-  name: String,
-  done: Boolean,
-};
-
-const CommentModel = {
-  author: UserRefModel,
-  date: DateModel,
-  comment: String,
-};
-
-const HistoryModel = {
-  action: String,
-  description: String,
-  payload: mongoose.Schema.Types.Mixed,
-  author: UserRefModel,
-  date: DateModel,
-};
-
-const schema = {
-  author: UserRefModel,
-  project: ProjectRefModel,
-  name: NameModel,
-  description: DescriptionModel,
-  assignees: [AssigneeModel],
-  links: [LinkModel],
-  texts: mongoose.Schema.Types.Mixed,
-  metadata: mongoose.Schema.Types.Mixed,
-  goals: [GoalModel],
-  comments: [CommentModel],
-  tags: [String],
-  history: [HistoryModel],
-  created: DateModel,
-  updated: DateModel,
-};
-
-const taskSchema = new mongoose.Schema(schema);
-
-export const Task = mongoose.model<ITask>('Task', taskSchema);
+export const TaskModel = new Task().getModelForClass(Task);

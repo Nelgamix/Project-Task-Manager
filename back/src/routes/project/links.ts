@@ -1,8 +1,15 @@
-import {IProject} from "../../schemas/Project";
-import {ILink} from "../../schemas/common";
+import {InstanceType} from "typegoose";
+import {Project, ProjectLink} from "../../schemas/Project";
 
-export function updateLinks(project: IProject, links: ILink[]) {
+export function updateLinks(
+    project: InstanceType<Project>,
+    links: ProjectLink[],
+    defaultValue?: ProjectLink[]
+) {
   if (!links) {
+    return false;
+  } else if (defaultValue) {
+    project.links = defaultValue;
     return false;
   }
 

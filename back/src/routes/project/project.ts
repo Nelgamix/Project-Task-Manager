@@ -1,43 +1,15 @@
-/*const defaultPriorities = [
-    {id: 'low', name: 'Low'},
-    {id: 'medium', name: 'Medium'},
-    {id: 'high', name: 'High'},
-    {id: 'critical', name: 'Critical'},
-];
+import {InstanceType} from "typegoose";
+import {Project} from "../../schemas/Project";
 
-const defaultDifficulties = [
-    {id: 'easy', name: 'Easy'},
-    {id: 'medium', name: 'Medium'},
-    {id: 'hard', name: 'Hard'},
-];
-
-const defaultEstimatedTimes = [
-    {id: 'short', name: 'Short (1-2 hour)'},
-    {id: 'medium', name: 'Medium (~5 hours)'},
-    {id: 'long', name: 'Long (10+ hours)'},
-];
-
-const defaultStates = [
-    {id: 'open', name: 'Open'},
-    {id: 'closed', name: 'Closed'},
-    {id: 'draft', name: 'Draft'},
-    {id: 'analyse', name: 'To Analyse'},
-    {id: 'implement', name: 'To Implement'},
-    {id: 'fix', name: 'To Fix'},
-    {id: 'document', name: 'To Document'},
-];
-
-const defaultCategories = [];
-
-const defaultTypes = [
-    {id: 'bugfix', name: 'Bugfix'},
-    {id: 'feature', name: 'Feature'},
-];*/
-
-import {IProject} from "../../schemas/Project";
-
-export function updateName(project: IProject, name: string) {
+export function updateName(
+    project: InstanceType<Project>,
+    name: string,
+    defaultValue?: string
+) {
   if (!name) {
+    return false;
+  } else if (defaultValue) {
+    project.name = defaultValue;
     return false;
   }
 
@@ -46,8 +18,15 @@ export function updateName(project: IProject, name: string) {
   return true;
 }
 
-export function updateDescription(project: IProject, description: string) {
+export function updateDescription(
+    project: InstanceType<Project>,
+    description: string,
+    defaultValue?: string
+) {
   if (!description) {
+    return false;
+  } else if (defaultValue) {
+    project.description = defaultValue;
     return false;
   }
 

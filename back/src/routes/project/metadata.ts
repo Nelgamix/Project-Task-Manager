@@ -1,7 +1,15 @@
-import {IProject, IProjectMetadata} from "../../schemas/Project";
+import {InstanceType} from "typegoose";
+import {Project, ProjectMetadata} from "../../schemas/Project";
 
-export function updateMetadata(project: IProject, metadata: IProjectMetadata[]) {
+export function updateMetadata(
+    project: InstanceType<Project>,
+    metadata: ProjectMetadata[],
+    defaultValue?: ProjectMetadata[]
+) {
   if (!metadata) {
+    return false;
+  } else if (defaultValue) {
+    project.metadata = defaultValue;
     return false;
   }
 

@@ -1,21 +1,22 @@
 import {Router, Request, Response} from 'express';
 import {auth} from '../middleware';
 import passport from 'passport';
-import {getPasswordHash, User, IUser} from "../../schemas/User";
+import {User, UserModel, UserRole} from "../../schemas/User";
+import {InstanceType} from "typegoose";
 
 const router = Router();
 
 export default router;
 
-User.find({name: 'admin'}).then((users: IUser[]) => {
+UserModel.find({name: 'admin'}).then((users: InstanceType<User>[]) => {
   if (!users || users.length === 0) {
-    getPasswordHash('admin').then((hash: string) => {
-      new User({
+    User.getPasswordHash('admin').then((hash: string) => {
+      new UserModel({
         name: 'admin',
         displayName: 'admin',
         email: '',
         image: '',
-        role: 'admin',
+        role: UserRole.Admin,
         password: hash,
       }).save();
 
@@ -25,7 +26,7 @@ User.find({name: 'admin'}).then((users: IUser[]) => {
 });
 
 function login(req: Request, res: Response) {
-  User.findByIdAndUpdate(req.user._id, {lastLogin: Date.now()}).then((user: IUser | null) => {
+  UserModel.findByIdAndUpdate(req.user._id, {lastLogin: Date.now()}).then((user: InstanceType<User> | null) => {
     res.json(user);
     // User.findById(req.user.id, {password: 0}).then(doc => res.json(doc));
   });
@@ -48,7 +49,7 @@ function reqGet(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  User.findById(id, {password: 0}).then((user: IUser | null) => {
+  UserModel.findById(id, {password: 0}).then((user: InstanceType<User> | null) => {
     if (!user) {
       return res.sendStatus(404);
     }
@@ -73,8 +74,8 @@ function reqCreate(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  getPasswordHash(password).then((hash: string) => {
-    const user = new User({
+  User.getPasswordHash(password).then((hash: string) => {
+    const user = new UserModel({
       name,
       displayName,
       email,
@@ -97,7 +98,7 @@ function reqUpdate(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  User.findById(id).then((user: IUser | null) => {
+  UserModel.findById(id).then((user: InstanceType<User> | null) => {
     if (!user) {
       return res.sendStatus(404);
     }
@@ -117,7 +118,7 @@ function reqDelete(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  User.findByIdAndDelete(id).then(() => res.sendStatus(200));
+  UserModel.findByIdAndDelete(id).then(() => res.sendStatus(200));
 }
 
 router.post('/login', passport.authenticate('local'), login);

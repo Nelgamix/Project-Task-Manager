@@ -6,7 +6,8 @@ import passport from 'passport';
 import {Strategy as LocalStrategy} from 'passport-local';
 import cookieParser from 'cookie-parser';
 import connectMongo from 'connect-mongo';
-import {IUser, User} from './schemas/User';
+import {User, UserModel} from "./schemas/User";
+import {InstanceType} from "typegoose";
 // Routes
 import project from './routes/project/routes';
 import task from './routes/task/routes';
@@ -36,7 +37,7 @@ mongoose.connect(`mongodb://${HOST}/${BASE}`, { useNewUrlParser: true }).then(()
         usernameField: 'username',
         passwordField: 'password',
       }, (username: string, password: string, done: (err: any, obj?: any, errObj?: any) => void) => {
-        User.findOne({name: username}, (err: any, user: IUser) => {
+        UserModel.findOne({name: username}, (err: any, user: InstanceType<User>) => {
           if (err) {
             return done(err);
           }
@@ -45,7 +46,7 @@ mongoose.connect(`mongodb://${HOST}/${BASE}`, { useNewUrlParser: true }).then(()
             return done(null, false, { message: 'Incorrect username.' });
           }
 
-          (user as any).validatePassword(password, (res: any) => {
+          user.validatePassword(password).then((res: boolean) => {
             if (!res) {
               done(null, false, { message: 'Incorrect password.' });
             } else {
@@ -61,7 +62,7 @@ mongoose.connect(`mongodb://${HOST}/${BASE}`, { useNewUrlParser: true }).then(()
   });
 
   passport.deserializeUser((id: string, cb: (err: any, data?: any) => void) => {
-    User.findById(id).then((user: any) => {
+    UserModel.findById(id).then((user: InstanceType<User> | null) => {
       cb(null, user);
     }, (err: any) => {
       cb(err);

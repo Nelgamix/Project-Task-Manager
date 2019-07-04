@@ -1,6 +1,7 @@
 import {Router, Request, Response} from 'express';
-import {ITask, Task} from '../../schemas/Task';
 import {auth} from '../middleware';
+import {Task, TaskAssignee, TaskComment, TaskGoal, TaskHistory, TaskLink, TaskModel} from "../../schemas/Task";
+import {InstanceType} from "typegoose";
 
 const router = Router();
 
@@ -13,21 +14,12 @@ function reqGet(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  Task.findById(id).then((task: ITask | null) => {
+  TaskModel.findById(id).then((task: InstanceType<Task> | null) => {
     if (!task) {
       return res.sendStatus(404);
     }
 
     return res.json(task);
-
-    /*return Promise.all([
-      Project.findById(task.projectId),
-      User.findById(task.userId),
-    ]).then(val => {
-      task._doc.project = val[0];
-      task._doc.user = val[1];
-      return res.json(task);
-    });*/
   });
 }
 
@@ -36,20 +28,20 @@ function reqCreate(req: Request, res: Response) {
   const project = req.body.project;
   const name = req.body.name;
   const description = req.body.description || '';
-  const assignees = [];
-  const links = [];
+  const assignees: TaskAssignee[] = [];
+  const links: TaskLink[] = [];
   const texts = {}; // TODO: extend from project
   const metadata = {}; // TODO: extend from project
-  const goals = [];
-  const comments = [];
+  const goals: TaskGoal[] = [];
+  const comments: TaskComment[] = [];
   const tags = req.body.tags || [];
-  const history = [];
+  const history: TaskHistory[] = [];
 
   if (!author || !project || !name) {
     return res.sendStatus(400);
   }
 
-  const task = new Task({
+  const task = new TaskModel({
     author,
     project,
     name,
@@ -64,7 +56,7 @@ function reqCreate(req: Request, res: Response) {
     history,
   });
 
-  task.save().then((savedTask: ITask) => res.json(savedTask));
+  task.save().then((savedTask: InstanceType<Task>) => res.json(savedTask));
 }
 
 function reqUpdate(req: Request, res: Response) {
@@ -74,7 +66,7 @@ function reqUpdate(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  Task.findById(id).then((task: ITask | null) => {
+  TaskModel.findById(id).then((task: InstanceType<Task> | null) => {
     if (!task) {
       return res.sendStatus(404);
     }
@@ -90,7 +82,7 @@ function reqDelete(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  Task.findByIdAndDelete(id).then(() => {
+  TaskModel.findByIdAndDelete(id).then(() => {
     return res.sendStatus(200);
   });
 }
