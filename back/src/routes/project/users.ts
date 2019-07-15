@@ -3,6 +3,8 @@ import {diff} from "../common";
 import {InstanceType} from "typegoose";
 import {Project, ProjectUser} from "../../schemas/Project";
 
+const defaultUsers: any[] = [];
+
 export function updateUser(source: ProjectUser, update: ProjectUser) {
   if (update.right) {
     source.right = update.right;
@@ -12,12 +14,12 @@ export function updateUser(source: ProjectUser, update: ProjectUser) {
 export function updateUsers(
     project: InstanceType<Project>,
     users: ProjectUser[],
-    defaultValue?: ProjectUser[]
+    allowDefault = false
 ) {
   if (!users) {
     return false;
-  } else if (defaultValue) {
-    project.users = defaultValue;
+  } else if (allowDefault && defaultUsers) {
+    project.users = defaultUsers;
     return false;
   }
 

@@ -1,3 +1,39 @@
+export interface ValidationError {
+  error: string;
+  object?: any;
+}
+
+export enum ManipulationErrorType {
+  NotFound,
+  NotValidated,
+  NotSaved,
+}
+
+export interface ManipulationError {
+  type: ManipulationErrorType;
+  error?: string;
+}
+
+export interface ManipulationResult {
+  success: boolean;
+  result?: any; // if success = true
+  error?: ManipulationError; // if success = false
+}
+
+export function createManipulationResultSuccess(result?: any): ManipulationResult {
+  return {
+    success: true,
+    result,
+  };
+}
+
+export function createManipulationResultFail(error: ManipulationError): ManipulationResult {
+  return {
+    success: false,
+    error,
+  };
+}
+
 export function diff(
     arrayRef: any[],
     arrayDiff: any[],

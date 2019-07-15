@@ -49,35 +49,6 @@ const defaultTypes = [
     {id: 'feature', name: 'Feature'},
 ];*/
 
-const defaultMetadata: any[] = [
-  {
-    name: 'State',
-    description: 'State of the ticket',
-    values: [
-      {
-        name: 'Open',
-        value: 0,
-      },
-      {
-        name: 'In Progress',
-        value: 1,
-      },
-      {
-        name: 'Closed',
-        value: 2,
-      },
-    ]
-  },
-];
-
-const defaultTexts: any[] = [
-  {
-    name: 'Todo',
-    description: '',
-    skeleton: '',
-  }
-];
-
 function reqGet(req: Request, res: Response) {
   const id = req.params.id;
 
@@ -108,11 +79,11 @@ function reqCreate(req: Request, res: Response) {
   let ok = true;
 
   ok = ok && updateName(project, req.body.name);
-  ok = ok && updateDescription(project, req.body.description, '');
-  ok = ok && updateUsers(project, req.body.users, []);
-  ok = ok && updateLinks(project, req.body.links, []);
-  ok = ok && updateMetadata(project, req.body.metadata, defaultMetadata);
-  ok = ok && updateTexts(project, req.body.texts, defaultTexts);
+  ok = ok && updateDescription(project, req.body.description, true);
+  ok = ok && updateUsers(project, req.body.users, true);
+  ok = ok && updateLinks(project, req.body.links, true);
+  ok = ok && updateMetadata(project, req.body.metadata, true);
+  ok = ok && updateTexts(project, req.body.texts, true);
 
   if (ok) {
     return project.save().then((savedProject: InstanceType<Project>) => res.json(savedProject));

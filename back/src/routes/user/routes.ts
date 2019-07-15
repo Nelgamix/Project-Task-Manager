@@ -3,6 +3,9 @@ import {auth} from '../middleware';
 import passport from 'passport';
 import {User, UserModel, UserRole} from "../../schemas/User";
 import {InstanceType} from "typegoose";
+import {update, updateDisplayName, updateEmail, updateImage, updateName} from "./updaters";
+import {ManipulationResult, ValidationError} from "../common";
+import {updateUserById} from "./manipulators";
 
 const router = Router();
 
@@ -26,9 +29,8 @@ UserModel.find({name: 'admin'}).then((users: InstanceType<User>[]) => {
 });
 
 function login(req: Request, res: Response) {
-  UserModel.findByIdAndUpdate(req.user._id, {lastLogin: Date.now()}).then((user: InstanceType<User> | null) => {
+  return UserModel.findByIdAndUpdate(req.user._id, {lastLogin: Date.now()}).then((user: InstanceType<User> | null) => {
     res.json(user);
-    // User.findById(req.user.id, {password: 0}).then(doc => res.json(doc));
   });
 }
 
@@ -42,57 +44,18 @@ function me(req: Request, res: Response) {
   return res.json(req.user);
 }
 
-function reqGet(req: Request, res: Response) {
-  const id = req.params.id;
+async function reqGet(req: Request, res: Response) {
+  const users: InstanceType<User>[] = await UserModel.find();
 
-  if (!id) {
-    return res.sendStatus(400);
+  if (!users) {
+    return res.sendStatus(500);
   }
 
-  UserModel.findById(id, {password: 0}).then((user: InstanceType<User> | null) => {
-    if (!user) {
-      return res.sendStatus(404);
-    }
-
-    res.json(user);
-
-    /*Project.find({userId: user.id}).then(projects => {
-      user._doc.projects = projects;
-      res.json(user);
-    });*/
-  });
+  return res.json(users);
 }
 
-function reqCreate(req: Request, res: Response) {
-  const name = req.body.name;
-  const displayName = req.body.displayName || name;
-  const email = req.body.email;
-  const role = 'user';
-  const password = req.body.password;
-
-  if (!name || !displayName || !email || !password) {
-    return res.sendStatus(400);
-  }
-
-  User.getPasswordHash(password).then((hash: string) => {
-    const user = new UserModel({
-      name,
-      displayName,
-      email,
-      role,
-      password: hash,
-    });
-
-    user.save().then(() => res.json(user));
-  });
-}
-
-function reqUpdate(req: Request, res: Response) {
+function reqGetId(req: Request, res: Response) {
   const id = req.params.id;
-  // Fields changeable
-  const displayName = req.body.displayName;
-  const email = req.body.email;
-  const image = req.body.image;
 
   if (!id) {
     return res.sendStatus(400);
@@ -103,11 +66,44 @@ function reqUpdate(req: Request, res: Response) {
       return res.sendStatus(404);
     }
 
-    if (displayName) user.displayName = displayName;
-    if (email) user.email = email;
-    if (image) user.image = image;
+    return res.json(user);
+  });
+}
 
-    user.save().then(() => res.json(user));
+function reqCreate(req: Request, res: Response) {
+  if (!req.body.name || !req.body.displayName || !req.body.email || !req.body.password) {
+    return res.sendStatus(400);
+  }
+
+  User.getPasswordHash(req.body.password).then((hash: string) => {
+    const user = new UserModel({
+      password: hash,
+      role: UserRole.User,
+    });
+
+    let error: ValidationError | undefined = update(user, req.body, false);
+
+    if (!error) {
+      return user.save().then(() => res.json(user));
+    }
+
+    return res.status(400).json(error);
+  });
+}
+
+function reqUpdate(req: Request, res: Response) {
+  const id = req.params.id;
+
+  if (!id) {
+    return res.sendStatus(400);
+  }
+
+  updateUserById(id, req.body, req.user).then((result: ManipulationResult) => {
+    if (result.success) {
+      return res.json(result.result);
+    } else {
+      return res.status(400).json(result.error);
+    }
   });
 }
 
@@ -118,14 +114,15 @@ function reqDelete(req: Request, res: Response) {
     return res.sendStatus(400);
   }
 
-  UserModel.findByIdAndDelete(id).then(() => res.sendStatus(200));
+  return UserModel.findByIdAndDelete(id).then(() => res.sendStatus(200));
 }
 
 router.post('/login', passport.authenticate('local'), login);
 router.post('/logout', auth, logout);
 router.get('/me', auth, me);
 
-router.get('/:name', auth, reqGet);
+router.get('/', auth, reqGet);
+router.get('/:id', auth, reqGetId);
 router.post('/', reqCreate);
-router.put('/:name', auth, reqUpdate);
-router.delete('/:name', auth, reqDelete);
+router.put('/:id', auth, reqUpdate);
+router.delete('/:id', auth, reqDelete);

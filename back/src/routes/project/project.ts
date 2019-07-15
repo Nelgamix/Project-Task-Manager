@@ -1,15 +1,18 @@
 import {InstanceType} from "typegoose";
 import {Project} from "../../schemas/Project";
 
+const defaultName = '';
+const defaultDescription = '';
+
 export function updateName(
     project: InstanceType<Project>,
     name: string,
-    defaultValue?: string
+    allowDefault = false
 ) {
   if (!name) {
     return false;
-  } else if (defaultValue) {
-    project.name = defaultValue;
+  } else if (allowDefault && defaultName) {
+    project.name = defaultName;
     return false;
   }
 
@@ -21,12 +24,12 @@ export function updateName(
 export function updateDescription(
     project: InstanceType<Project>,
     description: string,
-    defaultValue?: string
+    allowDefault = false
 ) {
   if (!description) {
     return false;
-  } else if (defaultValue) {
-    project.description = defaultValue;
+  } else if (allowDefault && defaultDescription) {
+    project.description = defaultDescription;
     return false;
   }
 

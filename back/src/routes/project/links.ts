@@ -1,15 +1,17 @@
 import {InstanceType} from "typegoose";
 import {Project, ProjectLink} from "../../schemas/Project";
 
+const defaultLinks: any[] = [];
+
 export function updateLinks(
     project: InstanceType<Project>,
     links: ProjectLink[],
-    defaultValue?: ProjectLink[]
+    allowDefault = false
 ) {
   if (!links) {
     return false;
-  } else if (defaultValue) {
-    project.links = defaultValue;
+  } else if (allowDefault && defaultLinks) {
+    project.links = defaultLinks;
     return false;
   }
 
